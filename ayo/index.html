@@ -12,9 +12,6 @@
 <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;1,300;1,400&family=Karla:wght@300;400;500&family=Parisienne&display=swap" rel="stylesheet" />
 
 <style>
-/* ============================================================
-   ROOT — night sky + blush
-============================================================ */
 :root{
   --night:      #0d0716;
   --ink:        #f7eef3;
@@ -73,9 +70,6 @@ main{ position:relative; z-index:2; }
 
 [hidden]{ display:none !important; }
 
-/* ============================================================
-   LAYOUT
-============================================================ */
 .wrap{
   width:min(100% - 3rem, 720px);
   margin-inline:auto;
@@ -171,16 +165,7 @@ h2{
   filter:drop-shadow(0 0 46px rgba(255,158,196,.35));
 }
 
-.hero .line{
-  font-style:italic;
-  font-size:clamp(1.1rem, 3.1vw, 1.34rem);
-  line-height:1.62;
-  color:var(--muted);
-  max-width:32ch;
-  margin:0 auto;
-}
-
-.hero .btn{ margin-top:2.6rem; }
+.hero .btn{ margin-top:1rem; }
 
 .sparkle{
   position:absolute;
@@ -537,13 +522,10 @@ h2{
   z-index:-1;
 }
 .candle-sec .label::before{ margin-inline:auto; }
-.candle-sec h2{ max-width:24ch; margin-inline:auto; margin-bottom:.7rem; }
-.candle-sec .sub{
-  font-style:italic;
-  color:var(--muted);
-  margin:0 auto 3rem;
-  max-width:34ch;
-  font-size:1.1rem;
+.candle-sec h2{
+  max-width:26ch;
+  margin-inline:auto;
+  margin-bottom:2.6rem;
 }
 
 .candle-stage{
@@ -661,6 +643,92 @@ footer .fine::after{
 }
 
 /* ============================================================
+   MUSIC BUTTON
+============================================================ */
+.music-btn{
+  position:fixed;
+  right:1.1rem;
+  bottom:1.1rem;
+  z-index:70;
+  width:56px;
+  height:56px;
+  border-radius:50%;
+  border:1px solid rgba(255,158,196,.55);
+  background:linear-gradient(150deg, rgba(255,158,196,.3), rgba(185,160,232,.24));
+  backdrop-filter:blur(14px);
+  -webkit-backdrop-filter:blur(14px);
+  color:var(--ink);
+  cursor:pointer;
+  display:grid;
+  place-items:center;
+  box-shadow:0 14px 36px -12px rgba(255,158,196,.65);
+  transition:transform .3s ease, box-shadow .4s ease, border-color .3s ease;
+}
+.music-btn:hover{
+  transform:translateY(-3px) scale(1.05);
+  border-color:rgba(255,158,196,.95);
+  box-shadow:0 20px 50px -14px rgba(255,158,196,.85);
+}
+.music-btn:focus-visible{ outline:2px solid var(--rose); outline-offset:4px; }
+
+.music-btn svg{
+  width:22px;
+  height:22px;
+  display:block;
+  fill:currentColor;
+}
+
+.music-btn .pause-icon{ display:none; }
+.music-btn.playing .play-icon{ display:none; }
+.music-btn.playing .pause-icon{ display:block; }
+
+/* rotating ring while playing */
+.music-btn::before{
+  content:"";
+  position:absolute;
+  inset:-4px;
+  border-radius:50%;
+  border:1px dashed rgba(255,158,196,.55);
+  opacity:0;
+  transition:opacity .4s ease;
+}
+.music-btn.playing::before{
+  opacity:1;
+  animation:spin 8s linear infinite;
+}
+@keyframes spin{
+  to{ transform:rotate(360deg); }
+}
+
+.music-label{
+  position:fixed;
+  right:5rem;
+  bottom:1.9rem;
+  z-index:69;
+  font-family:var(--ui);
+  font-size:.58rem;
+  letter-spacing:.24em;
+  text-transform:uppercase;
+  color:var(--muted);
+  background:rgba(13,7,22,.7);
+  backdrop-filter:blur(8px);
+  -webkit-backdrop-filter:blur(8px);
+  border:1px solid rgba(255,158,196,.25);
+  border-radius:999px;
+  padding:.45rem .9rem;
+  pointer-events:none;
+  opacity:0;
+  transform:translateX(8px);
+  transition:opacity .4s ease, transform .4s ease;
+  white-space:nowrap;
+}
+.music-btn:hover + .music-label,
+.music-btn:focus-visible + .music-label{
+  opacity:1;
+  transform:translateX(0);
+}
+
+/* ============================================================
    REVEAL
 ============================================================ */
 .js .reveal{
@@ -695,6 +763,9 @@ footer .fine::after{
   .sparkle.s2,.sparkle.s4{ right:8%; }
   .modal{ padding:1rem; }
   .modal-card{ max-height:88vh; }
+  .music-btn{ width:50px; height:50px; right:.9rem; bottom:.9rem; }
+  .music-btn svg{ width:19px; height:19px; }
+  .music-label{ right:4.5rem; bottom:1.6rem; font-size:.54rem; }
 }
 </style>
 </head>
@@ -704,10 +775,29 @@ footer .fine::after{
 <canvas id="sky" aria-hidden="true"></canvas>
 <canvas id="petals" aria-hidden="true"></canvas>
 
+<!-- ============================================================
+     MUSIC PLAYER  ✏️ MUSIC FILE
+     ------------------------------------------------------------
+     Put your MP3 in the same folder as index.html.
+     Rename it "my-friend.mp3" — or change the src below to match.
+============================================================ -->
+<audio id="bgMusic" src="my-friend.mp3" loop preload="auto"></audio>
+
+<button class="music-btn" id="musicBtn" aria-label="Play background music" aria-pressed="false">
+  <svg class="play-icon" viewBox="0 0 24 24" aria-hidden="true">
+    <path d="M8 5v14l11-7z"/>
+  </svg>
+  <svg class="pause-icon" viewBox="0 0 24 24" aria-hidden="true">
+    <path d="M6 5h4v14H6zM14 5h4v14h-4z"/>
+  </svg>
+</button>
+<span class="music-label" aria-hidden="true">My Friend — Johnny Drille</span>
+
+
 <main>
 
   <!-- ============================================================
-       HERO
+       HERO — subtitle text removed
   ============================================================ -->
   <header class="hero">
     <span class="sparkle s1" aria-hidden="true">✦</span>
@@ -724,12 +814,6 @@ footer .fine::after{
         <span class="heart">♥</span>
         <span class="line"></span>
       </div>
-
-      <p class="line reveal">
-        You're four thousand miles away, which is objectively too far.<br />
-        So tonight we're under the same sky — and I'm throwing you<br />
-        a party in the only place distance can't reach.
-      </p>
 
       <button class="btn reveal" id="partyBtn">Tap to open ♡</button>
     </div>
@@ -787,14 +871,13 @@ footer .fine::after{
 
 
   <!-- ============================================================
-       CANDLE
+       CANDLE  — heading + subtitle updated
   ============================================================ -->
   <section class="candle-sec">
     <div class="wrap">
       <p class="label reveal">One thing I can't do from here</p>
 
-      <h2 class="reveal">I can't hand you a cake. But I can give you a candle.</h2>
-      <p class="sub reveal">It isn't much. It's yours though.</p>
+      <h2 class="reveal">But I can give u a fake candle 😂 to blow</h2>
 
       <div class="candle-stage reveal">
         <button class="candle" id="candle" aria-label="Blow out the candle">
@@ -891,7 +974,7 @@ footer .fine::after{
 
 <script>
 /* ============================================================
-   THE 19 REASONS  ✏️ edit here if you want to tweak anything
+   THE 19 REASONS
 ============================================================ */
 const REASONS = [
   {
@@ -994,7 +1077,7 @@ const REASONS = [
     body: `<p>It might seem like life is not going the way we imagined, but let me be your constant reminder that you're doing so well, and I'm proud of you.</p>
            <p>It might not seem like you're doing your best yet, but trust me, you're enough.</p>
            <p>You're just turning 19 today, and I promise you, you're doing your best.</p>
-           <p>Don't get too caught up in sad emotions. I love how bubbly my Ayo is, and it's only that side of her I want to see.</p>
+           <p>Don't get caught up in sad emotions. I love how bubbly my Ayo is, and it's only that side of her I want to see.</p>
            <p>I pray God answers all your heart desires, and I also really hope our interview goes well today.</p>
            <p>Your Adun really loves you so much. ❤️</p>
            <p>And just a little reminder that I'm older than you abeg 😂, so I'm still the older one o. Please!</p>`
@@ -1047,13 +1130,11 @@ const REASONS = [
     bodyEl.innerHTML = reason.body;
 
     modal.hidden = false;
-    // trigger transition
     requestAnimationFrame(() => modal.classList.add('open'));
 
     document.body.classList.add('no-scroll');
     lastFocused = document.activeElement;
 
-    // focus the close button for accessibility
     setTimeout(() => closeEl.focus(), 120);
   }
 
@@ -1067,21 +1148,18 @@ const REASONS = [
     }, 350);
   }
 
-  // tap a tile
   document.getElementById('things').addEventListener('click', (e) => {
     const tile = e.target.closest('.thing');
     if (!tile) return;
     open(Number(tile.dataset.index));
   });
 
-  // close triggers
   closeEl.addEventListener('click', close);
   modal.querySelector('[data-close]').addEventListener('click', close);
   document.addEventListener('keydown', (e) => {
     if (e.key === 'Escape' && modal.classList.contains('open')) close();
   });
 
-  // trap tab focus inside the modal while open
   card.addEventListener('keydown', (e) => {
     if (e.key !== 'Tab') return;
     const focusables = card.querySelectorAll('button, [href], input, [tabindex]:not([tabindex="-1"])');
@@ -1122,6 +1200,52 @@ document.getElementById('partyBtn').addEventListener('click', () => {
   const letter = document.getElementById('letter');
   if (letter) letter.scrollIntoView({ behavior: 'smooth', block: 'start' });
 });
+
+
+/* ============================================================
+   MUSIC PLAYER
+============================================================ */
+(function music(){
+  const audio = document.getElementById('bgMusic');
+  const btn   = document.getElementById('musicBtn');
+  const label = document.querySelector('.music-label');
+
+  if (!audio || !btn) return;
+
+  function setPlaying(on){
+    btn.classList.toggle('playing', on);
+    btn.setAttribute('aria-pressed', String(on));
+    btn.setAttribute('aria-label', on ? 'Pause background music' : 'Play background music');
+    if (label) label.textContent = on ? 'Now playing ♡' : 'My Friend — Johnny Drille';
+  }
+
+  btn.addEventListener('click', async () => {
+    try {
+      if (audio.paused){
+        await audio.play();
+        setPlaying(true);
+      } else {
+        audio.pause();
+        setPlaying(false);
+      }
+    } catch (err){
+      // autoplay blocked or file missing — fail quietly
+      setPlaying(false);
+      if (label) label.textContent = 'add my-friend.mp3 ♡';
+      console.warn('Music could not play:', err);
+    }
+  });
+
+  // if the browser pauses us for any reason, sync the button
+  audio.addEventListener('pause', () => setPlaying(false));
+  audio.addEventListener('play',  () => setPlaying(true));
+
+  // if the file is missing, quietly note it on the label
+  audio.addEventListener('error', () => {
+    if (label) label.textContent = 'add my-friend.mp3 ♡';
+    setPlaying(false);
+  });
+})();
 
 
 /* ============================================================
